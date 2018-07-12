@@ -1,0 +1,342 @@
+<html>
+    <head>
+        <script type="text/javascript" src="intersection.js" ></script>
+        <script type="text/javascript">
+         function calculateIntersection() {
+             console.log("running function");
+             var lat1 = document.getElementById("lat1").value;
+             var lon1 = document.getElementById("lon1").value;
+             var bearing1 = document.getElementById("bearing1").value;
+             var lat2 = document.getElementById("lat2").value;
+             var lon2 = document.getElementById("lon2").value;
+             var bearing2 = document.getElementById("bearing2").value;
+             var result = intersection(lat1, lon1, bearing1, lat2, lon2, bearing2);
+             var distance12 = distance(lat1, lon1, lat2, lon2);
+             var distance1t = distance(lat1, lon1, result.lat, result.lon);
+             var distance2t = distance(lat2, lon2, result.lat, result.lon);
+             console.log(lat1 + " " + lat2 + " " + bearing1);
+             document.getElementById("result-latitude").textContent = result.lat;
+             document.getElementById("result-longitude").textContent = result.lon;
+             document.getElementById("result-distance-1-2").textContent = distance12;
+             document.getElementById("result-distance-1-target").textContent = distance1t;
+             document.getElementById("result-distance-2-target").textContent = distance2t;
+         }
+        </script>
+    </head>
+    <body>
+        <h3>Test Form</h3>
+        Point 1<br /> Latitude: <input type="text" id="lat1" /> Longitude: <input type="text" id="lon1" />, Heading: <input type="text" id="bearing1" /> <br />
+        Point 2:<br /> Latitude: <input type="text" id="lat2" /> Longitude: <input type="text" id="lon2" />, Heading: <input type="text" id="bearing2" /> <br /><br />
+        <button value="Submit" onClick="calculateIntersection()">Submit</button>
+        <div id="results">
+            Distance between point 1 and point 2:<div id="result-distance-1-2"></div><br />
+            Result Latitude: <div id="result-latitude"></div><br />
+            Result Longitude: <div id="result-longitude"></div><br />
+            Distance between point 1 and target:<div id="result-distance-1-target"></div><br />
+            Distance between point 2 and target:<div id="result-distance-2-target"></div><br />
+        <h3>Simple Example</h3>
+        <p>Given two points, one at 51.8853, 0.2545 looking at 108.547, and one at 49.0034, 2.5735 looking 32.435, the javacript call is `LatLon.intersection(51.8853, 0.2545, 108.547, 49.0034, 2.5735, 32.435);`  This returns LatLon {lat: 50.907607500474306, lon: 4.508574645770409};</p>
+        <h3>Error Bars</h3>
+        <h4>Inaccurate GPS Reading</h4>
+        <p>Assume an accurate bearing but an inaccurate initial location of one point, where we only know it within a circle of radius 10m.  This corresponds to 1/1000 of a latitude degree or 2/1000 of a longitude degree.  Here are some sample results from moving the first point approximately 10 meters, while looking in the same direction:</p>
+        <table style="border: solid 1px;">
+            <thead>
+                <tr style="border: solid 1px;">
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Initial Error(m)</th>
+                    <th>Result Latitude</th>
+                    <th>Result Longitude</th>
+                    <th>Size of Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2545</td>
+                    <td>0</td>
+                    <td>50.907607</td>
+                    <td>4.508574</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>51.8852</td>
+                    <td>0.2545</td>
+                    <td>11.12</td>
+                    <td>50.907527</td>
+                    <td>4.508488</td>
+                    <td>10.7467 meters</td>
+                </tr>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2543</td>
+                    <td>13.73</td>
+                    <td>50.907768</td>
+                    <td>4.508367</td>
+                    <td>22.655 meters</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>This is what happens when we change both points:
+            <table style="border: solid 1px;">
+                <thead>
+                    <tr style="border: solid 1px;">
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Initial Error(m)</th>
+                        <th>Longitude</th>
+                        <th>Latitude</th>
+                        <th>Initial Error(m)</th>
+                        <th>Result Latitude</th>
+                        <th>Result Longitude</th>
+                        <th>Size of Error(m)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>51.8852</td>
+                        <td>0.2545</td>
+                        <td>11.12</td>
+                        <td>49.0033</td>
+                        <td>2.5735</td>
+                        <td>11.12</td>
+                        <td>50.907708</td>
+                        <td>4.508405</td>
+                        <td>16.326</td>
+                    </tr>
+                    <tr>
+                        <td>51.8852</td>
+                        <td>0.2545</td>
+                        <td>11.12</td>
+                        <td>49.0034</td>
+                        <td>2.5733</td>
+                        <td>14.589</td>
+                        <td>50.907768</td>
+                        <td>4.508167</td>
+                        <td>33.687926</td>
+                    </tr>
+                    <tr>
+                        <td>51.8853</td>
+                        <td>0.2543</td>
+                        <td>13.73</td>
+                        <td>49.0033</td>
+                        <td>2.5735</td>
+                        <td>11.12</td>
+                        <td>45.996492</td>
+                        <td>4.508448</td>
+                        <td>15.71857</td>
+                    </tr>
+                    <tr>
+                        <td>51.8853</td>
+                        <td>0.2543</td>
+                        <td>13.73</td>
+                        <td>49.0034</td>
+                        <td>2.5733</td>
+                        <td>14.589</td>
+                        <td>50.907806</td>
+                        <td>4.50821</td>
+                        <td>33.779126</td>
+                    </tr>
+                </tbody>
+            </table>
+                    </tr>
+        <h4>Inaccurate Azimuth Reading</h4>
+        <p>Assume an accurate location, but an inaccurate heading of up to 2 degrees.  For this part we're using 51.8853, 0.2545, 110.8878 and 51.8763, 0.2545, 54.4525.  51.8853, 0.2545 and 51.8763, 0.2545 are 1000.754 meters apart.</p>
+        <p>The first point we're looking at is 51.882166, 0.267801, which is approximately directly east and in the middle of the two points.  From 51.8853, 0.2545 it's 977.18 meters away, and from 51.8763, 0.2545 it's 1122.0789 meters away.</p>
+        <table style="border: solid 1px;">
+            <thead>
+                <tr>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Bearing</th>
+                    <th>Result Latitude</th>
+                    <th>Result Longitude</th>
+                    <th>Size of Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2545</td>
+                    <td>110.8878</td>
+                    <td>51.882166</td>
+                    <td>0.267801</td>
+                    <td>0 meters</td>
+                </tr>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2545</td>
+                    <td>108.8878</td>
+                    <td>51.882383</td>
+                    <td>0.268294</td>
+                    <td>41.56 meters</td>
+                </tr>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2545</td>
+                    <td>112.8878</td>
+                    <td>51.881955</td>
+                    <td>0.267322</td>
+                    <td>40.3909 meters</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>The second target point is 51.882165, 0.2825.  The new headings are 100.2669 and 71.243, respectively.  It's approximately 1000 meters from the first point.  It's 1953.15 meters away from 51.8853, 0.2545 and 2029 meters away from 51.8763, 0.2545.</p>
+        <table style="border: solid 1px;">
+            <thead>
+                <tr>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Bearing</th>
+                    <th>Result Latitude</th>
+                    <th>Result Longitude</th>
+                    <th>Size of Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2545</td>
+                    <td>98.2669</td>
+                    <td>51.882599</td>
+                    <td>0.284566</td>
+                    <td>149.75 meters</td>
+                </tr>
+                <tr>
+                    <td>51.8853</td>
+                    <td>0.2545</td>
+                    <td>102.2669</td>
+                    <td>51.881783</td>
+                    <td>0.28067</td>
+                    <td>132.63 meters</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Let's try two initial points much closer together.  50.4, 4.5, 81.082778 and 50.4018, 4.5, 95.576944 are 200.150868 meters apart.  We're aiming at 50.401109, 4.511087.</p>
+        <p>Inaccurate reading from one side:</p>
+        <table style="border: solid 1px;">
+            <thead>
+                <tr>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Bearing</th>
+                    <th>Result Latitude</th>
+                    <th>Result Longitude</th>
+                    <th>Size of Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>81.082778</td>
+                    <td>50.401109</td>
+                    <td>4.511087</td>
+                    <td>0 meters</td>
+                </tr>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>79.082778</td>
+                    <td>50.401195</td>
+                    <td>4.509713</td>
+                    <td>97.853 meters</td>
+                </tr>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>83.082778</td>
+                    <td>50.400997</td>
+                    <td>4.512891</td>
+                    <td>128.466 meters</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Inaccurate reading from both sides:</p>
+        <table style="border: solid 1px;">
+            <thead>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Bearing</th>
+                <th>Initial Error(degrees)</th>
+                <th>Longitude</th>
+                <th>Latitude</th>
+                <th>Bearing</th>
+                <th>Initial Error(degrees)</th>
+                <th>Result Latitude</th>
+                <th>Result Longitude</th>
+                <th>Size of Error(m)</th>
+            </thead>
+            <tbody>
+                <tr>
+                <td>50.4</td>
+                <td>4.5</td>
+                <td>81.082778</td>
+                <td>0</td>
+                <td>50.4018</td>
+                <td>4.5</td>
+                <td>95.576944</td>
+                <td>0</td>
+                <td>50.401109</td>
+                <td>4.511087</td>
+                <td>0</td>
+                </tr>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>79.082778</td>
+                    <td>-2</td>
+                    <td>50.4018</td>
+                    <td>4.5</td>
+                    <td>93.576944</td>
+                    <td>-2</td>
+                    <td>50.401359</td>
+                    <td>4.511049</td>
+                    <td>27</td>
+                </tr>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>79.082778</td>
+                    <td>-2</td>
+                    <td>50.4018</td>
+                    <td>4.5</td>
+                    <td>97.576944</td>
+                    <td>+2</td>
+                    <td>50.401065</td>
+                    <td>4.508659</td>
+                    <td>172.158</td>
+                </tr>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>83.082778</td>
+                    <td>+2</td>
+                    <td>50.4018</td>
+                    <td>4.5</td>
+                    <td>93.576944</td>
+                    <td>-2</td>
+                    <td>50.401187</td>
+                    <td>4.515355</td>
+                    <td>302.625628</td>
+                </tr>
+                <tr>
+                    <td>50.4</td>
+                    <td>4.5</td>
+                    <td>83.082778</td>
+                    <td>+2</td>
+                    <td>50.4018</td>
+                    <td>4.5</td>
+                    <td>97.576944</td>
+                    <td>+2</td>
+                    <td>50.400858</td>
+                    <td>4.511098</td>
+                    <td>27.9208</td>
+                </tr>
+            </tbody>
+        </table>
+        <h3>Practical Experimentation</h3>
+        <p>Using an android phone, we took measurements at two locations: 31.507573, 34.59, 53 and 31.508386, 34.592148, 63.  These two points are 92.75 meters apart.  The phone only reported whole degrees.</p>
+        <p>The calculated result was 31.510377, 34.597002.  From point 1, this is 523.9 meters away, and from point 2 it's 499.741 meters away.<br />The actual location was 31.510139, 34.597002.  This is 46.25 meters away from the measured location.
+    </body>
+</html>
